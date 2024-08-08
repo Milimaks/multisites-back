@@ -4,6 +4,7 @@ import { LogUserDto } from './dto/log-user.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from './jwt.strategy';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  // This function is used to sign in the user.
   async signIn({ authBody }: { authBody: LogUserDto }) {
     const { email, password } = authBody;
 
@@ -32,6 +34,29 @@ export class AuthService {
 
     return this.authenticateUser({ userId: existingUser.id });
     // const hashedPassword = await this.hashPassword({ password });
+  }
+
+  // This function is used to sign up the user.
+  async signUp({ authBody }: { authBody: CreateUserDto }) {
+    const { email, password, firstName } = authBody;
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingUser) {
+      throw new Error('An account with this email already exists');
+    }
+    const hashedPassword = await this.hashPassword({ password });
+
+    const createdUser = await this.prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        firstName,
+      },
+    });
+
+    return this.authenticateUser({ userId: createdUser.id });
   }
 
   // This function hashes the password using bcrypt.

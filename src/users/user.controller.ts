@@ -1,9 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 
 @Controller('users')
-export class UsersController {
-  constructor(private readonly UsersService: UsersService) {}
+export class UserController {
+  constructor(private readonly UsersService: UserService) {}
 
   @Get()
   getUsers(): Promise<any> {
