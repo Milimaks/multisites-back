@@ -20,14 +20,14 @@ export class AuthController {
     return this.authService.signIn({ authBody });
   }
   @Post('register')
-  async signUp(@Body() authBody: CreateUserDto): Promise<any> {
-    return this.authService.signUp({ authBody });
+  async signUp(@Body() registerBody: CreateUserDto): Promise<any> {
+    return this.authService.signUp({ registerBody });
   }
 
   // 3. Send the JWT token in the header of the request
   @UseGuards(JwtAuthGuard)
   @Get()
-  async authenticateUser(@Req() request: RequestWithUser) {
+  async getAuthenticatedUser(@Req() request: RequestWithUser) {
     return await this.userService.getUserById({ userId: request.user.userId });
   }
 }

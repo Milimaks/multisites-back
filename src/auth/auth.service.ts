@@ -15,48 +15,72 @@ export class AuthService {
 
   // This function is used to sign in the user.
   async signIn({ authBody }: { authBody: LogUserDto }) {
-    const { email, password } = authBody;
+    try {
+      const { email, password } = authBody;
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    if (!existingUser) {
-      throw new Error('User not found');
+      const existingUser = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      if (!existingUser) {
+        throw new Error("L'utilisateur n'existe pas.");
+      }
+
+      const isPasswordValid = await this.isPasswordValid({
+        password,
+        hashedPassword: existingUser.password,
+      });
+
+      if (!isPasswordValid) {
+        throw new Error('Le mot de passe est invalide.');
+      }
+      return this.authenticateUser({
+        userId: existingUser.id,
+      });
+    } catch (error) {
+      return { error: true, message: error.message };
     }
-
-    const isPasswordValid = this.isPasswordValid({
-      password,
-      hashedPassword: existingUser.password,
-    });
-    if (!isPasswordValid || existingUser.email !== email) {
-      throw new Error('Invalid password or email');
-    }
-
-    return this.authenticateUser({ userId: existingUser.id });
-    // const hashedPassword = await this.hashPassword({ password });
   }
 
   // This function is used to sign up the user.
-  async signUp({ authBody }: { authBody: CreateUserDto }) {
-    const { email, password, firstName } = authBody;
+  async signUp({ registerBody }: { registerBody: CreateUserDto }) {
+    try {
+      const { email, firstName, password } = registerBody;
 
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email },
-    });
-    if (existingUser) {
-      throw new Error('An account with this email already exists');
+      const existingUser = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+      if (existingUser) {
+        throw new Error('Un compte existe déjà à cette adresse email.');
+      }
+      const hashedPassword = await this.hashPassword({ password });
+
+      const createdUser = await this.prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          firstName,
+        },
+      });
+
+      // await this.mailerService.sendCreatedAccountEmail({
+      //   firstName,
+      //   recipient: email,
+      // });
+
+      return this.authenticateUser({
+        userId: createdUser.id,
+      });
+    } catch (error) {
+      return {
+        error: true,
+        message: error.message,
+      };
     }
-    const hashedPassword = await this.hashPassword({ password });
-
-    const createdUser = await this.prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        firstName,
-      },
-    });
-
-    return this.authenticateUser({ userId: createdUser.id });
   }
 
   // This function hashes the password using bcrypt.
