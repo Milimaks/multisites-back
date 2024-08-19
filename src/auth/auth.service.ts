@@ -5,12 +5,14 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from './jwt.strategy';
 import { CreateUserDto } from './dto/create-user.dto';
+import { MailerService } from 'src/mailer.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
+    private readonly mailerService: MailerService,
   ) {}
 
   // This function is used to sign in the user.
@@ -67,10 +69,12 @@ export class AuthService {
         },
       });
 
-      // await this.mailerService.sendCreatedAccountEmail({
-      //   firstName,
-      //   recipient: email,
-      // });
+      // Send an email to the user when the account is created.
+      await this.mailerService.sendCreatedAccountEmail({
+        firstName,
+        recipient: email,
+      });
+      return;
 
       return this.authenticateUser({
         userId: createdUser.id,
