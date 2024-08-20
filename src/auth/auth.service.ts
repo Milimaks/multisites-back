@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from './jwt.strategy';
 import { CreateUserDto } from './dto/create-user.dto';
 import { MailerService } from 'src/mailer.service';
+import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class AuthService {
@@ -46,6 +47,52 @@ export class AuthService {
     }
   }
 
+  // This function is used to sign in the user.
+  async sendRequestToChangePassword({ email }: { email: string }) {
+    try {
+      const existingUser = await this.prisma.user.findUnique({
+        where: {
+          email,
+        },
+      });
+
+      if (!existingUser) {
+        throw new Error("L'utilisateur n'existe pas.");
+      }
+
+      if (existingUser.IsResettingPassword === true) {
+        throw new Error(
+          'Un email a déjà été envoyé pour réinitialiser votre mot de passe.',
+        );
+      }
+
+      const ResetToken = await createId();
+
+      await this.prisma.user.update({
+        where: {
+          email,
+        },
+        data: {
+          ResetPasswordToken: ResetToken,
+          IsResettingPassword: true,
+        },
+      });
+
+      this.mailerService.sendModificatePasswordEmail({
+        ResetToken,
+        recipient: email,
+        firstName: existingUser.firstName,
+      });
+
+      return {
+        error: false,
+        message: 'Un email a été envoyé pour réinitialiser votre mot de passe.',
+      };
+    } catch (error) {
+      return { error: true, message: error.message };
+    }
+  }
+
   // This function is used to sign up the user.
   async signUp({ registerBody }: { registerBody: CreateUserDto }) {
     try {
@@ -74,7 +121,6 @@ export class AuthService {
         firstName,
         recipient: email,
       });
-      return;
 
       return this.authenticateUser({
         userId: createdUser.id,

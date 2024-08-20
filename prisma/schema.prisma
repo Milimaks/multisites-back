@@ -20,4 +20,6 @@ model User {
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  IsResettingPassword Boolean @default(false)
+  ResetPasswordToken String? @unique
 }

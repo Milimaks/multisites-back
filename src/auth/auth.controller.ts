@@ -24,6 +24,11 @@ export class AuthController {
     return this.authService.signUp({ registerBody });
   }
 
+  @Post('forgot-password')
+  async sendRequestToChangePassword(@Body() { email }: { email: string }) {
+    return this.authService.sendRequestToChangePassword({ email });
+  }
+
   // 3. Send the JWT token in the header of the request
   @UseGuards(JwtAuthGuard)
   @Get()
