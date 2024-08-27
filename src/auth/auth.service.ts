@@ -7,6 +7,7 @@ import { UserPayload } from './jwt.strategy';
 import { CreateUserDto } from './dto/create-user.dto';
 import { MailerService } from 'src/mailer.service';
 import { createId } from '@paralleldrive/cuid2';
+import { ResetUserPasswordDto } from './dto/reset-user-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -80,7 +81,7 @@ export class AuthService {
 
       this.mailerService.sendModificatePasswordEmail({
         ResetToken,
-        recipient: email,
+        recipient: existingUser.email,
         firstName: existingUser.firstName,
       });
 
@@ -157,5 +158,83 @@ export class AuthService {
     return {
       access_token: await this.jwtService.sign(payload),
     };
+  }
+  async verifyResetPasswordToken({ token }: { token: string }) {
+    try {
+      const existingUser = await this.prisma.user.findUnique({
+        where: {
+          ResetPasswordToken: token,
+        },
+      });
+
+      if (!existingUser) {
+        throw new Error("L'utilisateur n'existe pas.");
+      }
+
+      if (existingUser.IsResettingPassword === false) {
+        throw new Error(
+          "Aucune demande de réinitialisation de mot de passe n'est en cours.",
+        );
+      }
+
+      return {
+        error: false,
+        message: 'Le token est valide et peut être utilisé.',
+      };
+      // return this.authenticateUser({
+      //   userId: existingUser.id,
+      // });
+    } catch (error) {
+      return { error: true, message: error.message };
+    }
+  }
+
+  async resetUserPassword({
+    resetPasswordDto,
+  }: {
+    resetPasswordDto: ResetUserPasswordDto;
+  }) {
+    try {
+      const { password, token } = resetPasswordDto;
+      const existingUser = await this.prisma.user.findUnique({
+        where: {
+          ResetPasswordToken: token,
+        },
+      });
+
+      if (!existingUser) {
+        throw new Error("L'utilisateur n'existe pas.");
+      }
+
+      if (existingUser.IsResettingPassword === false) {
+        throw new Error(
+          "Aucune demande de réinitialisation de mot de passe n'est en cours.",
+        );
+      }
+
+      const hashedPassword = await this.hashPassword({
+        password,
+      });
+      await this.prisma.user.update({
+        where: {
+          ResetPasswordToken: token,
+        },
+        data: {
+          IsResettingPassword: false,
+          ResetPasswordToken: null,
+          password: hashedPassword,
+        },
+      });
+
+      return {
+        error: false,
+        message: 'Votre mot de passe a bien été changé.',
+      };
+      // return this.authenticateUser({
+      //   userId: existingUser.id,
+      // });
+    } catch (error) {
+      return { error: true, message: error.message };
+    }
   }
 }

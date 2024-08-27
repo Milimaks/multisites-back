@@ -26,7 +26,7 @@ export class MailerService {
       from: 'Acme <onboarding@resend.dev>',
       to: [`${recipient}`],
       subject: `Hello ${firstName}!`,
-      html: `Si tu veux changer ton mot de passe, clique sur ce lien <strong> !</strong>`,
+      html: `Si tu veux changer ton mot de passe, clique sur ce lien <strong>${link} !</strong>`,
     });
 
     if (error) {
