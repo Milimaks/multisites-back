@@ -24,7 +24,7 @@ model User {
   ResetPasswordToken String? @unique
   firstFreePremium Boolean @default(false)
   freePremiumExpiration DateTime?
-  IsfreePremium Boolean @default(false)
+  isFreePremium Boolean @default(false)
 
   conversations   Conversation[]
   sentMessages    ChatMessage[]
