@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { UserService } from './users.service';
 
 @Controller('users')
@@ -8,6 +8,11 @@ export class UserController {
   @Get()
   getUsers(): Promise<any> {
     return this.UsersService.getUsers();
+  }
+
+  @Get('search')
+  async getUserBySearch(@Query('query') query: string) {
+    return this.UsersService.getUserBySearch({ query });
   }
 
   @Get(':userId')

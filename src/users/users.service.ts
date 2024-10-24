@@ -29,4 +29,20 @@ export class UserService {
       data: user,
     });
   }
+
+  async getUserBySearch({ query }: { query: string }) {
+    const findedUsers = await this.prisma.user.findMany({
+      where: {
+        OR: [
+          { firstName: { contains: query, mode: 'insensitive' } },
+          { lastName: { contains: query, mode: 'insensitive' } },
+        ],
+      },
+    });
+    return findedUsers.map((user) => {
+      return {
+        firstName: user.firstName,
+      };
+    });
+  }
 }
