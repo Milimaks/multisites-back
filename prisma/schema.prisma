@@ -29,6 +29,34 @@ model User {
 
   conversations   Conversation[]
   sentMessages    ChatMessage[]
+
+ sentFriendRequests    FriendRequest[] @relation("SentRequests")
+ receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+
+  friends1 Friend[] @relation("UserFriends1")
+  friends2 Friend[] @relation("UserFriends2")
+}
+model FriendRequest {
+  id        String   @id @default(cuid())
+  senderUserId         String
+  senderUser            User     @relation("SentRequests", fields: [senderUserId], references: [id])
+  receiverUserId        String   
+  receiverUser          User     @relation("ReceivedRequests", fields: [receiverUserId], references: [id])
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  @@unique([senderUserId, receiverUserId])
+}
+
+model Friend {
+  id        String   @id @default(cuid())
+  user1     User     @relation("UserFriends1", fields: [user1Id], references: [id])
+  user1Id   String  
+  user2     User     @relation("UserFriends2", fields: [user2Id], references: [id])
+  user2Id   String  
+  createdAt DateTime @default(now())
+
+  @@unique([user1Id, user2Id])
 }
 
 model Conversation {
@@ -51,3 +79,4 @@ model ChatMessage {
   @@index([chatId])
   @@index([senderId])
 }
+
