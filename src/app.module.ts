@@ -4,8 +4,8 @@ import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PremiumModule } from './premium/premium.module';
-import { FriendRequestService } from './friend-request/friend-request.service';
-import { FriendRequestModule } from './friend-request/friend-request.module';
+import { FriendService } from './friend/friend.service';
+import { FriendModule } from './friend/friend.module';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { FriendRequestModule } from './friend-request/friend-request.module';
     UsersModule,
     ConfigModule.forRoot({ isGlobal: true }),
     PremiumModule,
-    FriendRequestModule,
+    FriendModule,
   ],
   controllers: [AppController],
   providers: [],

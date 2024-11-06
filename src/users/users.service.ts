@@ -30,18 +30,28 @@ export class UserService {
     });
   }
 
-  async getUserBySearch({ query }: { query: string }) {
+  async getUserBySearch({ query, userId }: { query: string; userId: string }) {
     const findedUsers = await this.prisma.user.findMany({
       where: {
-        OR: [
-          { firstName: { contains: query, mode: 'insensitive' } },
-          { lastName: { contains: query, mode: 'insensitive' } },
+        AND: [
+          {
+            id: {
+              not: userId,
+            },
+          },
+          {
+            OR: [
+              { firstName: { contains: query, mode: 'insensitive' } },
+              { lastName: { contains: query, mode: 'insensitive' } },
+            ],
+          },
         ],
       },
     });
     return findedUsers.map((user) => {
       return {
         firstName: user.firstName,
+        userId: user.id,
       };
     });
   }

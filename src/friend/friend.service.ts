@@ -4,7 +4,7 @@ import { FriendRequestDto } from './dto/friend-request.dto';
 import { Friend, FriendRequest } from '@prisma/client';
 
 @Injectable()
-export class FriendRequestService {
+export class FriendService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Method to send a friend request
@@ -106,5 +106,18 @@ export class FriendRequestService {
     });
 
     return friendData; // Return the friend data if needed
+  }
+
+  // Method to get all friends for a user
+  async getAllFriendsForUser(userId: string): Promise<Friend[]> {
+    return await this.prisma.friend.findMany({
+      where: {
+        OR: [{ user1Id: userId }, { user2Id: userId }],
+      },
+      include: {
+        user1: true,
+        user2: true,
+      },
+    });
   }
 }

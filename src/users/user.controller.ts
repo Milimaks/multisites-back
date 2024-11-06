@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Req } from '@nestjs/common';
 import { UserService } from './users.service';
 
 @Controller('users')
@@ -11,8 +11,11 @@ export class UserController {
   }
 
   @Get('search')
-  async getUserBySearch(@Query('query') query: string) {
-    return this.UsersService.getUserBySearch({ query });
+  async getUserBySearch(
+    @Query('query') query: string,
+    @Query('userId') userId: string,
+  ) {
+    return this.UsersService.getUserBySearch({ query, userId });
   }
 
   @Get(':userId')
