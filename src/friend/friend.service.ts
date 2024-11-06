@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { FriendRequestDto } from './dto/friend-request.dto';
-import { Friend, FriendRequest } from '@prisma/client';
+import { Friend, FriendRequest, User } from '@prisma/client';
 
 @Injectable()
 export class FriendService {
@@ -109,15 +109,44 @@ export class FriendService {
   }
 
   // Method to get all friends for a user
-  async getAllFriendsForUser(userId: string): Promise<Friend[]> {
-    return await this.prisma.friend.findMany({
+  // Method to get all friends for a user
+  async getAllFriendsForUser(
+    userId: string,
+  ): Promise<{ id: string; firstName: string; lastName: string }[]> {
+    const friends = await this.prisma.friend.findMany({
       where: {
         OR: [{ user1Id: userId }, { user2Id: userId }],
       },
-      include: {
-        user1: true,
-        user2: true,
+      select: {
+        user1: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+        user2: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
       },
     });
+
+    return friends.map((friend) =>
+      friend.user1.id === userId
+        ? {
+            id: friend.user2.id,
+            firstName: friend.user2.firstName,
+            lastName: friend.user2.lastName,
+          }
+        : {
+            id: friend.user1.id,
+            firstName: friend.user1.firstName,
+            lastName: friend.user1.lastName,
+          },
+    );
   }
 }

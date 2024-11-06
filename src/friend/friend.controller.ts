@@ -16,6 +16,14 @@ import { FriendService } from './friend.service';
 export class FriendController {
   constructor(private readonly friendService: FriendService) {}
 
+  // Endpoint for getting friends
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  async getFriends(@Req() req) {
+    const userId = req.body.id;
+    const friends = await this.friendService.getAllFriendsForUser(userId);
+    return { friends };
+  }
   // Endpoint for sending a friend request
   @UseGuards(JwtAuthGuard)
   @Post('request')
@@ -65,14 +73,5 @@ export class FriendController {
       message: 'Friend removed successfully',
       friend: friendData,
     };
-  }
-
-  // Endpoint for getting friends
-  @UseGuards(JwtAuthGuard)
-  @Get()
-  async getFriends(@Req() req) {
-    const userId = req.user.userId;
-    const friends = await this.friendService.getFriends(userId);
-    return { friends };
   }
 }
