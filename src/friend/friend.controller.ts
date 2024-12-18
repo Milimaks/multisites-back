@@ -20,7 +20,7 @@ export class FriendController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async getFriends(@Req() req) {
-    const userId = req.body.id;
+    const userId = req.user.userId;
     const friends = await this.friendService.getAllFriendsForUser(userId);
     return { friends };
   }

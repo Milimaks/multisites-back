@@ -131,11 +131,10 @@ export class ChatService {
           },
         },
       });
-      // Envoi d'une notification à l'utilisateur ayant reçu le message
+      // Send a notification to the user that a new message has been sent
       this.socketService.server
         .to(updatedConversation.id)
         .emit('send-chat-update', updatedConversation.messages);
-      console.log(updatedConversation);
 
       return {
         error: false,

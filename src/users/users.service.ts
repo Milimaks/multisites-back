@@ -51,7 +51,8 @@ export class UserService {
     return findedUsers.map((user) => {
       return {
         firstName: user.firstName,
-        userId: user.id,
+        lastName: user.lastName,
+        id: user.id,
       };
     });
   }

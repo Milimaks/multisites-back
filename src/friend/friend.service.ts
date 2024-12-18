@@ -109,10 +109,14 @@ export class FriendService {
   }
 
   // Method to get all friends for a user
-  // Method to get all friends for a user
-  async getAllFriendsForUser(
-    userId: string,
-  ): Promise<{ id: string; firstName: string; lastName: string }[]> {
+  async getAllFriendsForUser(userId: string): Promise<
+    {
+      id: string;
+      firstName: string;
+      lastName: string;
+      conversationId: string | null;
+    }[]
+  > {
     const friends = await this.prisma.friend.findMany({
       where: {
         OR: [{ user1Id: userId }, { user2Id: userId }],
@@ -123,6 +127,18 @@ export class FriendService {
             id: true,
             firstName: true,
             lastName: true,
+            conversations: {
+              where: {
+                users: {
+                  some: {
+                    id: userId,
+                  },
+                },
+              },
+              select: {
+                id: true,
+              },
+            },
           },
         },
         user2: {
@@ -130,6 +146,18 @@ export class FriendService {
             id: true,
             firstName: true,
             lastName: true,
+            conversations: {
+              where: {
+                users: {
+                  some: {
+                    id: userId,
+                  },
+                },
+              },
+              select: {
+                id: true,
+              },
+            },
           },
         },
       },
@@ -141,11 +169,13 @@ export class FriendService {
             id: friend.user2.id,
             firstName: friend.user2.firstName,
             lastName: friend.user2.lastName,
+            conversationId: friend.user2.conversations[0]?.id || null,
           }
         : {
             id: friend.user1.id,
             firstName: friend.user1.firstName,
             lastName: friend.user1.lastName,
+            conversationId: friend.user1.conversations[0]?.id || null,
           },
     );
   }

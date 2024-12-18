@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
+import { AppGateway } from './app.gateway';
 import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { PremiumModule } from './premium/premium.module';
-import { FriendService } from './friend/friend.service';
+import { ChatModule } from './chat/chat.module';
 import { FriendModule } from './friend/friend.module';
+import { PremiumModule } from './premium/premium.module';
+import { SocketModule } from './socket/socket.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -14,8 +15,10 @@ import { FriendModule } from './friend/friend.module';
     ConfigModule.forRoot({ isGlobal: true }),
     PremiumModule,
     FriendModule,
+    ChatModule,
+    SocketModule,
   ],
-  controllers: [AppController],
-  providers: [],
+  controllers: [],
+  providers: [AppGateway],
 })
 export class AppModule {}
