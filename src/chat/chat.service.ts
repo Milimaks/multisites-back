@@ -132,9 +132,10 @@ export class ChatService {
         },
       });
       // Send a notification to the user that a new message has been sent
-      this.socketService.server
-        .to(updatedConversation.id)
-        .emit('send-chat-update', updatedConversation.messages);
+      this.socketService.server.emit(
+        'send-chat-update',
+        updatedConversation.messages,
+      );
 
       return {
         error: false,

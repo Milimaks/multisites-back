@@ -38,7 +38,6 @@ export class AppGateway implements OnGatewayInit, OnModuleInit {
     @MessageBody() conversationId: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log({ conversationId });
     socket.join(conversationId);
   }
 
